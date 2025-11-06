@@ -255,9 +255,7 @@ class MusicBingoApp:
         
         # Update display window if open
         if self.display_window and self.display_window.winfo_exists():
-            # Simple: just pass all played songs to the display
-            # The display will show the last 10
-            self.display_window.update_songs(self.played_songs)
+            self.display_window.clear_display()
     
     def play_next_song(self):
         """Play the next song in the playlist"""
@@ -298,9 +296,10 @@ class MusicBingoApp:
             elif values[3] == 'Playing':
                 self.playlist_tree.item(item, values=(values[0], values[1], values[2], 'Played'))
         
-        # Update display window - show all played songs including current
+        # Update display window
         if self.display_window and self.display_window.winfo_exists():
-            self.display_window.update_songs(self.played_songs)
+            # Don't show current song, only update after it's done
+            self.schedule_display_update()
         
         self.status_bar.config(text=f"Playing song {len(self.played_songs)} of {self.SONGS_PER_GAME}")
         
@@ -311,11 +310,13 @@ class MusicBingoApp:
         """Schedule display update when current song finishes"""
         def check_song_finished():
             if not pygame.mixer.music.get_busy():
-                # Song finished, mark it as no longer playing
-                self.is_playing = False
-                # Update display with all played songs (song has finished)
+                # Song finished, update display
                 if self.display_window and self.display_window.winfo_exists():
-                    self.display_window.update_songs(self.played_songs)
+                    # Show last 10 played songs (not including currently playing)
+                    if len(self.played_songs) > 0:
+                        # Remove current song from display list
+                        display_songs = self.played_songs[:-1] if self.is_playing else self.played_songs
+                        self.display_window.update_songs(display_songs)
             else:
                 # Check again in 1 second
                 self.root.after(1000, check_song_finished)
@@ -337,7 +338,12 @@ class MusicBingoApp:
             self.root.after(100, self.monitor_progress)
         else:
             self.progress_var.set(0)
-
+            if self.is_playing and not pygame.mixer.music.get_busy():
+                # Song ended, update display
+                self.is_playing = False
+                if self.display_window and self.display_window.winfo_exists():
+                    self.display_window.update_songs(self.played_songs)
+    
     def pause_song(self):
         """Pause/resume the current song"""
         if self.is_playing:
@@ -415,8 +421,6 @@ class DisplayWindow:
         # Make window stay on top
         self.window.attributes('-topmost', True)
         
-        print("✓ DisplayWindow initialized")
-        
         # Setup UI
         self.setup_ui()
     
@@ -446,72 +450,33 @@ class DisplayWindow:
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(2, weight=1)
         
-        # Initialize empty display - 10 labels
+        # Initialize empty display
         self.song_labels = []
         for i in range(10):
             label = ttk.Label(self.songs_frame, text="", 
                             font=('Arial', 16), foreground='gray')
             label.grid(row=i, column=0, sticky=tk.W, pady=5)
             self.song_labels.append(label)
-        
-        print(f"✓ Created {len(self.song_labels)} song labels")
     
     def update_songs(self, songs):
-        """Update the displayed songs list - show last 10 with red, white, blue colors"""
-        print(f"\n>>> update_songs() called with {len(songs)} songs")
-        
-        # Define colors for cycling
-        colors = ['red', 'white', 'blue']
-        
+        """Update the displayed songs list"""
         # Clear all labels first
         for label in self.song_labels:
             label.config(text="")
         
-        # If no songs yet, nothing to display
-        if not songs:
-            print(">>> No songs to display yet")
-            return
-        
-        # Get the last 10 songs (or fewer if less than 10 played)
-        last_10 = songs[-10:] if len(songs) > 10 else songs
-        print(f">>> Displaying last {len(last_10)} songs")
-        
-        # Display them in reverse order (most recent first)
-        for i, song in enumerate(reversed(last_10)):
-            # Calculate the actual song number from the game
-            song_number = len(songs) - i
-            
-            # Build display text
-            text = f"{song_number}. {song['title']} - {song['artist']}"
-            
-            # Get color for this row (cycles through red, white, blue)
-            color = colors[i % 3]
-            
-            print(f">>>   {text} [{color}]")
-            
-            # Update the label with the color
-            # Note: white text needs black background or dark foreground for visibility
-            if color == 'white':
-                # White background with black text
-                self.song_labels[i].config(text=text, foreground='white')
-            else:
-                # Red or blue text on default background
-                self.song_labels[i].config(text=text, foreground=color, background='')
-        
-        print(">>> Display updated!\n")
+        # Display last 10 songs (most recent first)
+        display_songs = songs[-10:] if len(songs) > 10 else songs
+        for i, song in enumerate(reversed(display_songs)):
+            if i < 10:
+                text = f"{len(songs) - i}. {song['title']} - {song['artist']}"
+                self.song_labels[i].config(text=text, foreground='black')
     
     def clear_display(self):
         """Clear the display for a new game"""
-        print(">>> Clearing display for new game")
         for label in self.song_labels:
             label.config(text="", foreground='gray')
-    
-    def winfo_exists(self):
-        """Check if the window still exists"""
-        try:
-            return self.window.winfo_exists()
-        except:
-            return False
+
+
 class CardGenerator:
     """Window for generating and printing bingo cards"""
     
