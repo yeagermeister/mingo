@@ -10,7 +10,7 @@ from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TALB
 import argparse
 
-SONGS_PER_GAME = 50  # Changed from 75 to 50
+SONGS_PER_GAME = 75  # Changed from 75 to 50
 
 def scan_library(folder_path):
     """Scan and report on music library"""

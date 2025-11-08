@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Music Bingo - A macOS application for running music bingo games
-Modified for 50-song games
 """
 
 import tkinter as tk
@@ -36,7 +35,7 @@ class MusicBingoApp:
         self.library_folder = ""
         
         # Game parameters
-        self.SONGS_PER_GAME = 50  # Changed from 75 to 50
+        self.SONGS_PER_GAME = 75  
         
         # Display window reference
         self.display_window = None
@@ -122,7 +121,7 @@ class MusicBingoApp:
                                            length=400, mode='determinate')
         self.progress_bar.grid(row=2, column=0, pady=5, sticky=(tk.W, tk.E))
         
-        # Game playlist - Updated label to show 50 songs
+        # Game playlist 
         playlist_frame = ttk.LabelFrame(main_frame, text=f"Game Playlist ({self.SONGS_PER_GAME} songs)", padding="10")
         playlist_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
         
@@ -234,7 +233,7 @@ class MusicBingoApp:
         self.current_song = None
         self.game_active = True
         
-        # Select 50 random songs for this game
+        # Select  random songs for this game
         self.current_game_songs = random.sample(self.music_library, self.SONGS_PER_GAME)
         
         # Shuffle the order for playback
