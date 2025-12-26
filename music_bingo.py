@@ -604,9 +604,7 @@ class CardGenerator:
                 else:
                     song = selected_songs[song_index]
                     # Include song number for reference (1-50 instead of 1-75)
-                    song_num = self.songs.index(song) + 1
                     card_row.append({
-                        'number': song_num,
                         'title': song['title'],
                         'artist': song['artist']
                     })
@@ -677,14 +675,6 @@ class CardGenerator:
                     width: 20%;
                     vertical-align: middle;
                     position: relative;
-                }}
-                .song-number {{
-                    position: absolute;
-                    top: 2px;
-                    left: 2px;
-                    font-size: 10px;
-                    color: #999;
-                    font-weight: bold;
                 }}
                 .song-title {{
                     font-weight: bold;
