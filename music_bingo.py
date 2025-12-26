@@ -426,13 +426,13 @@ class DisplayWindow:
         
         # Title
         title_label = ttk.Label(main_frame, text="MUSIC BINGO", 
-                               font=('Arial', 36, 'bold'))
+                               font=('Arial', 48, 'bold'))
         title_label.grid(row=0, column=0, pady=20)
         
         # Instructions
         instructions = ttk.Label(main_frame, 
                                 text="Last 10 Songs Played", 
-                                font=('Arial', 18))
+                                font=('Arial', 36))
         instructions.grid(row=1, column=0, pady=10)
         
         # Songs list frame
@@ -449,7 +449,7 @@ class DisplayWindow:
         self.song_labels = []
         for i in range(10):
             label = ttk.Label(self.songs_frame, text="", 
-                            font=('Arial', 16), foreground='gray')
+                            font=('Arial', 36), foreground='gray')
             label.grid(row=i, column=0, sticky=tk.W, pady=5)
             self.song_labels.append(label)
         
